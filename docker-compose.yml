@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+    mercure: 
+        image: dunglas/mercure
+        environment:
+            - JWT_KEY=aw3s0mep4ss
+            - CORS_ALLOWED_ORIGINS=*
+            - ALLOW_ANONYMOUS=true
+            - PUBLISH_ALLOWED_ORIGINS=http://command-interceptor
+    commands:
+        build:
+            context: .
+        environment:
+            - SHELL_VERBOSITY=3
+        depends_on:
+            - mercure
+        volumes:
+            - '.:/usr/src/chatbot'
