@@ -20,12 +20,11 @@ final class Consumer
     }
 
     /**
-     * @return ArrayIterator|App\Message\MessageInterface[]
+     * @return \ArrayIterator|\App\Message\MessageInterface[]
      */
     public function __invoke(array $topics): \Iterator
     {
         $url = $this->mercureHubUrl.'?topic='.implode('&topic=', $topics);
-
         $source = $this->client->connect($url);
 
         while ($source) {

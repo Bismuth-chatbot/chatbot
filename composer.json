@@ -2,7 +2,7 @@
     "type": "chatbot",
     "license": "mit",
     "require": {
-        "php": "^7.4.9",
+        "php": "^7.4",
         "ext-ctype": "*",
         "ext-iconv": "*",
         "ext-sockets": "*",
@@ -17,7 +17,14 @@
         "symfony/mercure": "^0.4.0",
         "symfony/property-access": "5.1.*",
         "symfony/property-info": "5.1.*",
-        "symfony/serializer": "5.1.*"
+        "symfony/serializer": "5.1.*",
+
+        "drift/http-kernel": "0.1.*, >=0.1.7",
+        "drift/server": "0.1.*, >=0.1.7",
+        "drift/react-functions": "0.1.*",
+        "drift/event-loop-utils": "0.1.*",
+        "ext-json": "*",
+        "jwilsson/spotify-web-api-php": "3.5.0"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^2.17@dev"
@@ -50,7 +57,7 @@
     },
     "scripts": {
         "auto-scripts": {
-            "cache:clear": "symfony-cmd",
+            "cache:clear": "symfony-cmd"
         },
         "post-install-cmd": [
             "@auto-scripts"

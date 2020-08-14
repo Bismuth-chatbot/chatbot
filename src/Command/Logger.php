@@ -6,19 +6,20 @@ use App\Mercure\Consumer as MercureConsumer;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 final class Logger extends Command
 {
-    private $mercureConsumer;
-    private $logger;
+    private MercureConsumer $mercureConsumer;
+    private LoggerInterface $logger;
+    private string $twitchChannel;
 
-    public function __construct(MercureConsumer $mercureConsumer, LoggerInterface $logger)
+    public function __construct(MercureConsumer $mercureConsumer, LoggerInterface $logger, string $twitchChannel)
     {
         $this->mercureConsumer = $mercureConsumer;
         $this->logger = new NullLogger();
+        $this->twitchChannel = $twitchChannel;
         parent::__construct();
     }
 
@@ -28,7 +29,6 @@ final class Logger extends Command
     {
         $this
             ->setDescription('Logs every command published on the mercure hub')
-            ->addArgument('channel', InputArgument::REQUIRED, 'The twitch channel to subscribe to.')
         ;
     }
 
@@ -38,7 +38,6 @@ final class Logger extends Command
 
         $f = fopen('./number', 'w+');
         $f2 = fopen('./persec', 'w+');
-        $topics = ['https://twitch.tv/'.$input->getArgument('channel')];
 
         $i = 0;
         $timestart = microtime(true);
@@ -46,9 +45,11 @@ final class Logger extends Command
 
         fwrite($f2, "received;duration;tstart;tend\n");
 
+        $topics = ['https://twitch.tv/'.$this->twitchChannel];
         foreach ($this->mercureConsumer->__invoke($topics) as $data) {
             if ($data->isCommand()) {
-                $this->logger->info(sprintf('Got a "%s" command from "%s" on the channel "%s"', $data->getCommand(), $data->getNickname(), $data->getChannel()));
+                $this->logger->info(sprintf('Got a "%s" command from "%s" on the channel "%s"', $data->getCommand(),
+                    $data->getNickname(), $data->getChannel()));
             }
 
             $timeend = microtime(true);
