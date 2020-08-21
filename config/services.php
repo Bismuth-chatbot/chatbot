@@ -27,18 +27,21 @@ return function (ContainerConfigurator $configurator) {
     $parameters->set('app.mercure.jwt', $_ENV['MERCURE_JWT_TOKEN'])
         ->set('app.mercure.hub', $_ENV['MERCURE_HUB_URL'])
     ;
-
+    $configurator->import('preload.yml');
     $services = $configurator->services()
         ->defaults()
         ->autowire()
         ->autoconfigure()
+        ->bind('$bootstrapPath', getcwd() . '/vendor/drift/server/src/bootstrap.php')
         ->bind('$mercureHubUrl', '%app.mercure.hub%')
         ->bind('$twitchChannel', '%app.twitch.channel_name%')
         ->bind('$httpHost', '0.0.0.0:8080')
     ;
-
     $services->load('App\\', '../src/*')
         ->exclude('../src/{DependencyInjection,Entity,Tests,Kernel.php}')
+    ;
+    $services->load('App\\Drift\\Controller\\', "%app.path%/src/Drift/Controller/*")
+        ->tag('controller.service_arguments')
     ;
     // Register every commands
     $services->load('App\\Command\\', '../src/Command/')->tag('console.command');

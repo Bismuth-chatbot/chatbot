@@ -53,6 +53,9 @@
     "drift/http-kernel": {
         "version": "0.1.11"
     },
+    "drift/preload-bundle": {
+        "version": "dev-master"
+    },
     "drift/react-functions": {
         "version": "0.1.1"
     },
@@ -77,8 +80,11 @@
     "indigophp/hash-compat": {
         "version": "1.2-dev"
     },
-    "jwilsson/spotify-web-api-php": {
-        "version": "3.5.0"
+    "mmoreram/base-bundle": {
+        "version": "2.2.0"
+    },
+    "mmoreram/symfony-bundle-dependencies": {
+        "version": "2.2.0"
     },
     "php": {
         "version": "7.4"
