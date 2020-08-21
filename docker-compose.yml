@@ -1,7 +1,7 @@
-version: '3.8'
+version: '3.4'
 
 services:
-    mercure: 
+    mercure:
         image: dunglas/mercure
         environment:
             - WRITE_TIMEOUT=0s
@@ -10,7 +10,7 @@ services:
             - ALLOW_ANONYMOUS=true
             - PUBLISH_ALLOWED_ORIGINS=http://command-interceptor,http://localhost
         ports:
-            - "8080:80"
+            - '8080:80'
 
     commands:
         build:
@@ -21,3 +21,5 @@ services:
             - mercure
         volumes:
             - '.:/usr/src/chatbot'
+        ports:
+            - '8081:8080'

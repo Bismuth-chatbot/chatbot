@@ -2,23 +2,25 @@
 
 namespace App\Command;
 
+use App\Http\Client as HttpClient;
 use App\Mercure\Consumer as MercureConsumer;
-use App\Twitch\Client as TwitchClient;
+use App\Message\Message;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 final class Dice extends Command
 {
-    private $mercureConsumer;
-    private $twitchClient;
+    private MercureConsumer $mercureConsumer;
+    private HttpClient $httpClient;
+    private string $twitchChannel;
 
-    public function __construct(TwitchClient $twitchClient, MercureConsumer $mercureConsumer)
+    public function __construct(HttpClient $httpClient, MercureConsumer $mercureConsumer, string $twitchChannel)
     {
         $this->mercureConsumer = $mercureConsumer;
-        $this->twitchClient = $twitchClient;
+        $this->httpClient = $httpClient;
         parent::__construct();
+        $this->twitchChannel = $twitchChannel;
     }
 
     protected static $defaultName = 'app:dice';
@@ -26,20 +28,20 @@ final class Dice extends Command
     protected function configure()
     {
         $this
-            ->setDescription('Rolls a dice and answer to twitch when requested.')
-            ->addArgument('channel', InputArgument::REQUIRED, 'The twitch channel to write to.')
-        ;
+            ->setDescription('Rolls a dice and answer to twitch when requested.');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $topics = [sprintf('https://twitch.tv/%s/command/dice', $input->getArgument('channel'))];
-        $this->twitchClient->connect();
-
+        $topics = [sprintf('https://twitch.tv/%s/command/dice', $this->twitchChannel)];
         foreach ($this->mercureConsumer->__invoke($topics) as $message) {
             $dice = $message->getCommandArguments()[0] ?? 6;
             $rand = random_int(1, $dice);
-            $this->twitchClient->sendMessage(sprintf('%s sent a %d dice resulting in a %d', $message->getNickname(), $dice, $rand));
+            $this->httpClient->postMessage('twitch', sprintf('%s sent a %d dice resulting in a %d',
+                '@'.$message->getNickname(),
+                $dice,
+                $rand
+            ));
         }
 
         return Command::SUCCESS;
