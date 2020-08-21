@@ -1,10 +1,19 @@
 <?php
 
+/*
+ * This file is part of the Bizmuth Bot project
+ *
+ * (c) Antoine Bluchet <antoine@bluchet.fr>
+ * (c) Lemay Marc <flugv1@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace App\Command;
 
 use App\Http\Client as HttpClient;
 use App\Mercure\Consumer as MercureConsumer;
-use App\Message\Message;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
