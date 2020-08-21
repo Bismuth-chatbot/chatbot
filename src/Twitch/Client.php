@@ -30,18 +30,17 @@ final class Client
     private const MAX_LINE = 512;
     private DuplexStreamInterface $socket;
     private LoggerInterface $logger;
-    private string $channel;
+    private string $twitchChannel;
     private string $oauthToken;
     private string $botUsername;
     private $loop;
 
-    public function __construct(string $oauthToken, string $botUsername, string $channel)
+    public function __construct(string $oauthToken, string $botUsername, string $twitchChannel)
     {
         $this->logger = new NullLogger();
-        $this->channel = $channel;
+        $this->twitchChannel = $twitchChannel;
         $this->oauthToken = $oauthToken;
         $this->botUsername = $botUsername;
-        $this->channel = $channel;
         $this->loop = Factory::create();
     }
 
@@ -50,10 +49,10 @@ final class Client
         $stream = stream_socket_client(self::TWITCH_IRC_URI.':'.self::TWITCH_IRC_PORT);
         $this->socket = new DuplexResourceStream($stream, $loop ?? $this->loop, self::MAX_LINE);
         $this->logger->info(sprintf('Connecting onto %s:%s on channel %s as %s', self::TWITCH_IRC_URI,
-            self::TWITCH_IRC_PORT, $this->channel, $this->botUsername));
+            self::TWITCH_IRC_PORT, $this->twitchChannel, $this->botUsername));
         $this->send(sprintf('PASS %s', $this->oauthToken));
         $this->send(sprintf('NICK %s', $this->botUsername));
-        $this->send(sprintf('JOIN #%s', $this->channel));
+        $this->send(sprintf('JOIN #%s', $this->twitchChannel));
 
         return $this->socket;
     }
@@ -75,7 +74,7 @@ final class Client
 
     public function sendMessage(string $message): void
     {
-        $this->send(sprintf('PRIVMSG #%s :%s', $this->channel, $message));
+        $this->send(sprintf('PRIVMSG #%s :%s', $this->twitchChannel, $message));
         $this->logger->info('send message '.$message." \r\n");
     }
 

@@ -20,7 +20,7 @@ return function(ContainerConfigurator $configurator) {
         ->autowire()
         ->autoconfigure()
         ->bind('$mercureHubUrl', '%app.mercure.hub%')
-        ->bind('$twitchChannel', $_ENV['TWITCH_CHANNEL_NAME'])
+        ->bind('$twitchChannel', '%app.twitch.channel_name%')
         ->bind('$httpHost', '0.0.0.0:8080')
     ;
 
@@ -58,7 +58,7 @@ return function(ContainerConfigurator $configurator) {
     $services->get(TwitchClient::class)
         ->arg('$oauthToken', '%app.twitch.oauth_token%')
         ->arg('$botUsername', '%app.twitch.bot_username%')
-        ->arg('$channel', '%app.twitch.channel_name%')
+        ->arg('$twitchChannel', '%app.twitch.channel_name%')
         ->call('setLogger', [service('logger')])
     ;
 };
