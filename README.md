@@ -8,6 +8,8 @@ It's architecture uses Mercure as a central part of the application. This would 
 
 The asynchronous framework [DriftPHP](https://driftphp.io/) is used to handle asynchronous connections to chat providers (eg: twitch irc) and and access to these providers through an HTTP API. 
 
+Part of this project basis comes from [@flugv1 twitch chatbot](https://github.com/flug/chatbot-twitch).
+
 ## Run
 
 Commands run through supervisord, with docker you have supervisord and mercure pre-configured:

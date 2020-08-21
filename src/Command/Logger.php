@@ -1,10 +1,19 @@
 <?php
 
+/*
+ * This file is part of the Bizmuth Bot project
+ *
+ * (c) Antoine Bluchet <antoine@bluchet.fr>
+ * (c) Lemay Marc <flugv1@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace App\Command;
 
 use App\Mercure\Consumer as MercureConsumer;
 use Psr\Log\LoggerInterface;
-use Psr\Log\NullLogger;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -34,7 +43,7 @@ final class Logger extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $output->writeln('PID: ' . getmypid());
+        $output->writeln('PID: '.getmypid());
 
         $f = fopen('./number', 'w+');
         $f2 = fopen('./persec', 'w+');
@@ -53,12 +62,12 @@ final class Logger extends Command
             }
 
             $timeend = microtime(true);
-            $duration = ($timeend - $timestart); 
-            $persec++;
+            $duration = ($timeend - $timestart);
+            ++$persec;
 
             fwrite($f, (string) ++$i);
             fseek($f, 0);
-            
+
             if ($duration >= 1.0) {
                 fwrite($f2, sprintf("%d;%d;%d;%d\n", $persec, $duration, $timestart, $timeend));
                 $timestart = $timeend;
