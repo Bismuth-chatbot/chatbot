@@ -25,11 +25,6 @@ final class Message extends AbstractMessage
         return explode(' ', substr($this->message, 1))[0];
     }
 
-    public function jsonSerialize()
-    {
-        return parent::jsonSerialize() + ['isCommand' => $this->isCommand(), 'command' => $this->getCommand()];
-    }
-
     public function getCommandArguments(): array
     {
         $command = explode(' ', substr($this->message, 1));

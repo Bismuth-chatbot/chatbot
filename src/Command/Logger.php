@@ -18,7 +18,7 @@ final class Logger extends Command
     public function __construct(MercureConsumer $mercureConsumer, LoggerInterface $logger, string $twitchChannel)
     {
         $this->mercureConsumer = $mercureConsumer;
-        $this->logger = new NullLogger();
+        $this->logger = $logger;
         $this->twitchChannel = $twitchChannel;
         parent::__construct();
     }
@@ -56,7 +56,7 @@ final class Logger extends Command
             $duration = ($timeend - $timestart); 
             $persec++;
 
-            fwrite($f, ++$i);
+            fwrite($f, (string) ++$i);
             fseek($f, 0);
             
             if ($duration >= 1.0) {

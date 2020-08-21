@@ -31,7 +31,6 @@ final class Client
     private string $oauthToken;
     private string $botUsername;
     private $loop;
-    private bool $isRun = false;
 
     public function __construct(string $oauthToken, string $botUsername, string $channel)
     {
@@ -54,31 +53,6 @@ final class Client
         $this->send(sprintf('JOIN #%s', $this->channel));
 
         return $this->socket;
-    }
-
-    public function isRun(): bool
-    {
-        return $this->isRun;
-    }
-
-    public function run(?float $withTimer = null)
-    {
-        if ($withTimer == !null) {
-            $this->loop->addTimer($withTimer, function () {
-                $this->loop->stop();
-            });
-        }
-        $this->loop->run();
-    }
-
-    public function end($data = null)
-    {
-        $this->socket->end($data);
-    }
-
-    public function stop()
-    {
-        $this->loop->stop();
     }
 
     public function setLogger(LoggerInterface $logger): void
@@ -110,13 +84,14 @@ final class Client
     public function send(string $message): void
     {
         if (!$this->isConnected()) {
-            throw new TwitchConnectionFailedException($this->getError());
+            throw new TwitchConnectionFailedException('Not connected');
         }
         $this->socket->write($message." \n");
     }
 
     public function parse(string $data): \Iterator
     {
+        /* @phpstan-ignore-next-line */
         $messages = array_filter(preg_split('/[\r\n]/', $data), 'strlen');
         foreach ($messages as $message) {
             if (preg_match_all('/^:(.+?(?=!)).+ PRIVMSG (.+?(?=:)):(.+)$/', $message, $matches)) {
@@ -130,15 +105,6 @@ final class Client
     public function close()
     {
         $this->socket->close();
-    }
-
-    public function getError(): string
-    {
-        if ($this->socket) {
-            return socket_strerror(socket_last_error($this->socket));
-        }
-
-        return 'No socket';
     }
 
     public function isConnected(): bool

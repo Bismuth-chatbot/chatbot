@@ -78,5 +78,7 @@ class Server extends Command
 
         $io->success('Server is up on '.$this->httpServer->getHttpHost());
         $loop->run();
+
+        return Command::SUCCESS;
     }
 }

@@ -10,13 +10,15 @@ use Symfony\Component\Serializer\SerializerInterface;
 
 final class Consumer
 {
-    private $client;
+    private EventSourceHttpClient $client;
+    private SerializerInterface $serializer;
+    private string $mercureHubUrl;
 
-    public function __construct(EventSourceHttpClient $client, SerializerInterface $serializer, $mercureHubUrl)
+    public function __construct(EventSourceHttpClient $client, SerializerInterface $serializer, string $mercureHubUrl)
     {
-        $this->mercureHubUrl = $mercureHubUrl;
         $this->client = $client;
         $this->serializer = $serializer;
+        $this->mercureHubUrl = $mercureHubUrl;
     }
 
     /**
@@ -48,8 +50,6 @@ final class Consumer
                 $source = $this->client->connect($url);
             }
         }
-
-        return;
     }
 
     private function getMessageClass(array $topics): string

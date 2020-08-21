@@ -27,7 +27,8 @@
         "jwilsson/spotify-web-api-php": "3.5.0"
     },
     "require-dev": {
-        "friendsofphp/php-cs-fixer": "^2.17@dev"
+        "friendsofphp/php-cs-fixer": "^2.17@dev",
+        "phpstan/phpstan": "^0.12.0@dev"
     },
     "config": {
         "optimize-autoloader": true,
