@@ -1,0 +1,13 @@
+{
+  "name": "benchmarks",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "devDependencies": {
+    "serve": "^11.3.2"
+  },
+  "dependencies": {
+    "apexcharts": "^3.20.0",
+    "event-source-polyfill": "^1.0.16"
+  }
+}

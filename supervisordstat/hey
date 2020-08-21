@@ -1,0 +1,2 @@
+hey -n 100000 -m POST -T "application/x-www-form-urlencoded" -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJtZXJjdXJlIjp7InB1Ymxpc2giOltdfX0.GFRUFE2C1GaLTnX2WZnO3SoeOM0rrVcI0yph1K_Oo-w" -d "topic=https://twitch.tv/s0yuk4&data=%7B%22message%22%3A+%22%21dice%22%2C+%22nickname%22%3A+%22s0yuk4%22%2C+%22channel%22%3A+%22s0yuk4%22%7D" -h2 http://localhost:8080/.well-known/mercure
+

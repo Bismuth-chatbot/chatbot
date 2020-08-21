@@ -1,0 +1,59 @@
++ cat supervisordstat/vegeta
++ vegeta attack -format=http -rate 1 -connections 1 -duration 10s
++ vegeta report
+Requests      [total, rate, throughput]         10, 1.11, 1.10
+Duration      [total, attack, wait]             9.072s, 9s, 71.793ms
+Latencies     [min, mean, 50, 90, 95, 99, max]  3.119ms, 45.538ms, 70.745ms, 73.996ms, 74.728ms, 74.728ms, 74.728ms
+Bytes In      [total, mean]                     450, 45.00
+Bytes Out     [total, mean]                     1400, 140.00
+Success       [ratio]                           100.00%
+Status Codes  [code:count]                      200:10
+Error Set:
++ sleep 20s
++ cat supervisordstat/vegeta
++ vegeta attack -format=http -rate 50 -connections 1 -duration 30s
++ vegeta report
+Requests      [total, rate, throughput]         1500, 50.03, 50.03
+Duration      [total, attack, wait]             29.981s, 29.98s, 1.41ms
+Latencies     [min, mean, 50, 90, 95, 99, max]  1.149ms, 1.518ms, 1.39ms, 1.97ms, 2.207ms, 2.792ms, 4.925ms
+Bytes In      [total, mean]                     67500, 45.00
+Bytes Out     [total, mean]                     210000, 140.00
+Success       [ratio]                           100.00%
+Status Codes  [code:count]                      200:1500
+Error Set:
++ sleep 20s
++ cat supervisordstat/vegeta
++ vegeta attack -format=http -rate 50 -connections 100 -duration 1m
++ vegeta report
+Requests      [total, rate, throughput]         3000, 50.02, 50.02
+Duration      [total, attack, wait]             59.981s, 59.98s, 1.193ms
+Latencies     [min, mean, 50, 90, 95, 99, max]  1.056ms, 2.543ms, 1.355ms, 1.886ms, 2.057ms, 4.513ms, 313.943ms
+Bytes In      [total, mean]                     135000, 45.00
+Bytes Out     [total, mean]                     420000, 140.00
+Success       [ratio]                           100.00%
+Status Codes  [code:count]                      200:3000
+Error Set:
++ sleep 1m
++ cat supervisordstat/vegeta
++ vegeta attack -format=http -rate 50 -connections 10000 -duration 5m
++ vegeta report
+Requests      [total, rate, throughput]         15000, 50.00, 50.00
+Duration      [total, attack, wait]             5m0s, 5m0s, 1.183ms
+Latencies     [min, mean, 50, 90, 95, 99, max]  1.066ms, 1.812ms, 1.366ms, 1.892ms, 2.052ms, 2.88ms, 400.273ms
+Bytes In      [total, mean]                     675000, 45.00
+Bytes Out     [total, mean]                     2100000, 140.00
+Success       [ratio]                           100.00%
+Status Codes  [code:count]                      200:15000
+Error Set:
++ sleep 1m
++ cat supervisordstat/vegeta
++ vegeta attack -format=http -rate 100 -connections 50000 -duration 5m
++ vegeta report
+Requests      [total, rate, throughput]         30000, 100.00, 100.00
+Duration      [total, attack, wait]             5m0s, 5m0s, 1.277ms
+Latencies     [min, mean, 50, 90, 95, 99, max]  1.002ms, 1.602ms, 1.269ms, 1.756ms, 1.89ms, 2.452ms, 313.584ms
+Bytes In      [total, mean]                     1350000, 45.00
+Bytes Out     [total, mean]                     4200000, 140.00
+Success       [ratio]                           100.00%
+Status Codes  [code:count]                      200:30000
+Error Set:

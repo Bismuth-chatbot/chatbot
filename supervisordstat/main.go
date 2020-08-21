@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 	"os"
 	"os/exec"
 
@@ -17,9 +18,16 @@ func main() {
 			}
 
 			// 10 minutes pidstat, it'll exit if process exit
-			pidStatCmd := exec.Command("/usr/bin/pidstat", "-H", "-h", "-r", "-s", "-d", "-u", "-w", "-v", "-p", payload["pid"], "1", "600")
+			// -r memory
+			// -s stack utilization
+			// -d io
+			// -u cpu
+			// -w task switch kernel
+			// -v kernel tables
+			// -I so that -u values are divided by the number of cpus
+			pidStatCmd := exec.Command("/usr/bin/pidstat", "-I", "-H", "-h", "-r", "-d", "-u", "-p", payload["pid"], "1")
 
-			f, err := os.Create(fmt.Sprintf("./monit-%s.txt", payload["processname"]))
+			f, err := os.Create(fmt.Sprintf("./monit-%s-%s.txt", payload["processname"], fmt.Sprint(time.Now().Unix())))
 			if err != nil {
 				panic(err)
 			}
@@ -32,7 +40,8 @@ func main() {
 
 			go func() {
 				err = pidStatCmd.Wait()
-				fmt.Printf("Command finished with error: %v", err)
+				// fmt.Printf("Command finished with error: %v", err)
+				fmt.Fprintf(os.Stderr, "Command finished with error: %v", err)
 				// @TODO : run csv extract
 			}()
 		}

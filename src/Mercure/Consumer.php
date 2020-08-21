@@ -27,21 +27,26 @@ final class Consumer
         $url = $this->mercureHubUrl.'?topic='.implode('&topic=', $topics);
 
         $source = $this->client->connect($url);
+
         while ($source) {
-            foreach ($this->client->stream($source, 2) as $r => $chunk) {
-                if ($chunk->isTimeout()) {
-                    continue;
-                }
+            try {
+                foreach ($this->client->stream($source, 2) as $r => $chunk) {
+                    if ($chunk->isTimeout() || $chunk->isFirst()) {
+                        continue;
+                    }
 
-                if ($chunk->isLast()) {
-                    $source = null;
+                    if ($chunk->isLast()) {
+                        $source = null;
+                        return;
+                    }
 
-                    return;
+                    if ($chunk instanceof ServerSentEvent) {
+                        yield $this->serializer->deserialize($chunk->getData(), $this->getMessageClass($topics), 'json');
+                    }
                 }
-
-                if ($chunk instanceof ServerSentEvent) {
-                    yield $this->serializer->deserialize($chunk->getData(), $this->getMessageClass($topics), 'json');
-                }
+            } catch (\LogicException $e) {
+                $source->cancel();
+                $source = $this->client->connect($url);
             }
         }
 

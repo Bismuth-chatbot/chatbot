@@ -1,0 +1,2 @@
+http --form POST http://localhost:8080/.well-known/mercure Authorization:'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJtZXJjdXJlIjp7InB1Ymxpc2giOltdfX0.GFRUFE2C1GaLTnX2WZnO3SoeOM0rrVcI0yph1K_Oo-w' topic=https://twitch.tv/s0yuk4 data='{"message": "!dice", "nickname": "s0yuk4", "channel": "s0yuk4"}'
+
