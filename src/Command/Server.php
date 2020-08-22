@@ -1,5 +1,4 @@
 <?php
-
 /*
  * This file is part of the Bizmuth Bot project
  *
@@ -9,14 +8,18 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-
 declare(strict_types=1);
 
 namespace App\Command;
 
+use App\Http\Router\Exception\NotFoundRouteException;
+use App\Http\Router\RoutesCollection;
 use App\Http\Server as HttpServer;
+use App\Mercure\Topic;
+use App\Service\ClientCollection;
 use App\Twitch\Client as TwitchClient;
 use Psr\Http\Message\ServerRequestInterface;
+use React\ChildProcess\Process;
 use React\EventLoop\Factory as EventLoopFactory;
 use React\Http\Message\Response;
 use Symfony\Component\Console\Command\Command;
@@ -34,61 +37,81 @@ class Server extends Command
     private Publisher $publisher;
     private SerializerInterface $serializer;
     private HttpServer $httpServer;
-
+    /**
+     * @var RoutesCollection
+     */
+    private RoutesCollection $routes;
+    private array $commands;
+    
     public function __construct(
         TwitchClient $twitchClient,
         Publisher $publisher,
         SerializerInterface $serializer,
-        HttpServer $httpServer
+        HttpServer $httpServer,
+        RoutesCollection $routes,
+        array $commands,
+        ClientCollection $clients
     ) {
+        
+        
         $this->twitchClient = $twitchClient;
         $this->publisher = $publisher;
         $this->serializer = $serializer;
         $this->httpServer = $httpServer;
         parent::__construct();
+        $this->routes = $routes;
+        $this->commands = $commands;
     }
-
+    
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $io = new SymfonyStyle($input, $output);
         $loop = EventLoopFactory::create();
-
-        $this->httpServer->run($loop, function (ServerRequestInterface $request) use ($io) {
+    
+        
+        $consoleBin = getcwd() . '/bin/console';
+        foreach ($this->commands as $command) {
+            $process = new Process($consoleBin . " " . $command . ' -vvv');
+            $process->start($loop);
+        
+        }
+        
+        $clientSocket = $this->twitchClient->connect($loop);
+        $this->httpServer->run($loop, function(ServerRequestInterface $request) use ($io) {
+            
             if (false === strpos($request->getHeader('content-type')[0], 'application/json')) {
                 return new Response(400);
             }
-
-            switch ($request->getUri()->getPath()) {
-                case '/twitch':
-                    try {
-                        $body = json_decode($request->getBody()->getContents(), true);
-                        $this->twitchClient->sendMessage($body['message']);
-
-                        return new Response(202);
-                    } catch (\Exception $e) {
-                        $io->error($e->getMessage());
-
-                        return new Response(500);
-                    }
+            $io->writeln([$request->getMethod(), $request->getUri()->getPath()]);
+            try {
+               return $this->routes->get($request->getMethod(), $request->getUri()->getPath())($this->twitchClient, $request);
+            } catch (NotFoundRouteException $e) {
+                return new Response(404);
+            } catch (\Exception $e) {
+                $io->error([$e->getMessage(), $e->getLine(), $e->getFile()]);
+                
+                return new Response(500);
             }
         });
-
-        $clientSocket = $this->twitchClient->connect($loop);
-        $clientSocket->on('data', function ($data) {
-            foreach ($this->twitchClient->parse($data) as $message) {
-                $channel = substr($message->getChannel(), 1); // remove #
-                $topics = [sprintf('https://twitch.tv/%s', $channel)];
-                if ($message->isCommand()) {
-                    $topics[] = sprintf('https://twitch.tv/%s/command/%s', $channel, $message->getCommand());
-                }
-
-                $this->publisher->__invoke(new Update($topics, $this->serializer->serialize($message, 'json')));
+        
+        
+        $clientSocket->on('data', [$this->twitchClient, 'parse']);
+        $clientSocket->on('message', function($data) use ($io) {
+            $message = json_decode($data, true);
+            $channel = $message['channel'][0] === '#' ? substr($message['channel'],
+                1) : $message['channel']; // remove #
+            $topics = [Topic::create(['<channel>' => $channel])];
+            if ((bool)$message['isCommand']) {
+                $topics[] = Topic::create(['<channel>' => $channel, '<command>' => $message['command']]);
             }
+            
+            $io->success('send message ' . json_encode($message));
+            $this->publisher->__invoke(new Update($topics, $data));
+            
         });
-
-        $io->success('Server is up on '.$this->httpServer->getHttpHost());
+        $io->success('Server is up on ' . $this->httpServer->getHttpHost());
         $loop->run();
-
+        
         return Command::SUCCESS;
     }
 }
