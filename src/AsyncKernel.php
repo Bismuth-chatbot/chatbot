@@ -21,7 +21,6 @@ class AsyncKernel extends Kernel
 {
     use MicroKernelTrait;
 
-    
     protected function configureContainer(ContainerConfigurator $container): void
     {
         if (is_file($path = \dirname(__DIR__).'/config/services.php')) {

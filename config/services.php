@@ -37,7 +37,7 @@ return function (ContainerConfigurator $configurator) {
         ->defaults()
         ->autowire()
         ->autoconfigure()
-        ->bind('$bootstrapPath', getcwd() . '/vendor/drift/server/src/bootstrap.php')
+        ->bind('$bootstrapPath', getcwd().'/vendor/drift/server/src/bootstrap.php')
         ->bind('$mercureHubUrl', '%app.mercure.hub%')
         ->bind('$twitchChannel', '%app.twitch.channel_name%')
         ->bind('$httpHost', '0.0.0.0:8080')
@@ -99,5 +99,4 @@ return function (ContainerConfigurator $configurator) {
     $services->set(RoutesCollection::class)
         ->args([tagged_iterator('app.controller.command')])
     ;
-    
 };
