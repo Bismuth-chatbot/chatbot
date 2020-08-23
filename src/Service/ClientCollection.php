@@ -16,27 +16,30 @@ class ClientCollection implements IClient
     
     public function sendMessage(string $message): void
     {
-        // TODO: Implement sendMessage() method.
+        /** @var IClient $client */
+        foreach ($this->clients as $client){
+            $client->sendMessage($message);
+        }
     }
     
     public function emit(string $messageType, array $content): void
     {
-        // TODO: Implement emit() method.
+        /** @var IClient $client */
+        foreach ($this->clients as $client){
+            $client->emit($messageType, $content);
+        }
     }
     
     public function get(string $service): IClient
     {
         /** @var IClient $client */
         foreach ($this->clients as $client) {
-            if ($client->getType() === $service) {
+            if (get_class($client) === $service) {
                 return $client;
             }
         }
         throw new ClientServiceNotFoundException();
     }
     
-    public function getType(): string
-    {
-        return ClientCollection::class;
-    }
+    
 }

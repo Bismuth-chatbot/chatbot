@@ -11,5 +11,4 @@ interface IClient
     
     public function get(string $service): IClient;
     
-    public function getType(): string;
 }

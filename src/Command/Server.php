@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 namespace App\Command;
 
-use App\Http\Router\Exception\NotFoundRouteException;
+use App\Http\Router\Exception\RouteNotFoundException;
 use App\Http\Router\RoutesCollection;
 use App\Http\Server as HttpServer;
 use App\Mercure\Topic;
@@ -85,7 +85,7 @@ class Server extends Command
             $io->writeln([$request->getMethod(), $request->getUri()->getPath()]);
             try {
                return $this->routes->get($request->getMethod(), $request->getUri()->getPath())($this->twitchClient, $request);
-            } catch (NotFoundRouteException $e) {
+            } catch (RouteNotFoundException $e) {
                 return new Response(404);
             } catch (\Exception $e) {
                 $io->error([$e->getMessage(), $e->getLine(), $e->getFile()]);

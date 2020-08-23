@@ -116,9 +116,4 @@ final class Client implements IClient
     {
         return $this;
     }
-    
-    public function getType(): string
-    {
-        return Client::class;
-    }
 }

@@ -16,12 +16,6 @@ class PostCommand implements CommandController
         $body = json_decode($request->getBody()->getContents(), true);
         $client->sendMessage($body['message']);
         
-        return new Response(
-            200,
-            [
-                'Content-Type' => 'text/plain',
-            ],
-            "Ok !\n"
-        );
+        return new Response(204);
     }
 }

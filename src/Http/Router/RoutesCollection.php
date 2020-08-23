@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Http\Router;
 
 use App\Drift\Controller\CommandController;
-use App\Http\Router\Exception\NotFoundRouteException;
+use App\Http\Router\Exception\RouteNotFoundException;
 use function Symfony\Component\String\u;
 
 class RoutesCollection
@@ -27,6 +27,6 @@ class RoutesCollection
             }
             
         }
-        throw new NotFoundRouteException();
+        throw new RouteNotFoundException();
     }
 }
