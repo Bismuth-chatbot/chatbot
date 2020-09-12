@@ -12,39 +12,36 @@
 
 namespace App\Command;
 
+use App\Spotify\Client as SpotifyClient;
 use App\Transport\TransportInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-final class Dice extends Command
+final class CurrentSpotifyTrack extends Command
 {
+    private SpotifyClient $spotifyClient;
     private TransportInterface $transport;
 
-    public function __construct(TransportInterface $transport)
+    public function __construct(TransportInterface $transport, SpotifyClient $spotifyClient)
     {
         $this->transport = $transport;
+        $this->spotifyClient = $spotifyClient;
         parent::__construct();
     }
 
-    protected static $defaultName = 'app:dice';
+    protected static $defaultName = 'app:current-spotify-track';
 
     protected function configure()
     {
         $this
-            ->setDescription('Rolls a dice and answer to twitch when requested.');
+            ->setDescription('User\'s Currently Playing Track.');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        foreach ($this->transport->commands('dice') as $message) {
-            $dice = $message->getCommandArguments()[0] ?? 6;
-            $rand = random_int(1, $dice);
-            $this->transport->send(sprintf('%s sent a %d dice resulting in a %d',
-                '@'.$message->getNickname(),
-                $dice,
-                $rand
-            ));
+        foreach ($this->transport->commands('music') as $message) {
+            $this->transport->send('Current track: '.$this->spotifyClient->getCurrentTrack());
         }
 
         return Command::SUCCESS;

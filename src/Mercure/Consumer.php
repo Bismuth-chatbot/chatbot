@@ -40,26 +40,26 @@ final class Consumer
         $source = $this->client->connect($url);
 
         while ($source) {
-            try {
-                foreach ($this->client->stream($source, 2) as $r => $chunk) {
-                    if ($chunk->isTimeout() || $chunk->isFirst()) {
-                        continue;
-                    }
-
-                    if ($chunk->isLast()) {
-                        $source = null;
-
-                        return;
-                    }
-
-                    if ($chunk instanceof ServerSentEvent) {
-                        yield $this->serializer->deserialize($chunk->getData(), $this->getMessageClass($topics), 'json');
-                    }
+            // try {
+            foreach ($this->client->stream($source, 2) as $r => $chunk) {
+                if ($chunk->isTimeout() || $chunk->isFirst()) {
+                    continue;
                 }
-            } catch (\LogicException $e) {
-                $source->cancel();
-                $source = $this->client->connect($url);
+
+                if ($chunk->isLast()) {
+                    $source = null;
+
+                    return;
+                }
+
+                if ($chunk instanceof ServerSentEvent) {
+                    yield $this->serializer->deserialize($chunk->getData(), $this->getMessageClass($topics), 'json');
+                }
             }
+            // } catch (\LogicException $e) {
+            //     $source->cancel();
+            //     $source = $this->client->connect($url);
+            // }
         }
     }
 
