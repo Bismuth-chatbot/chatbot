@@ -24,6 +24,7 @@ function toDataString(data) {
  */
 class SseStream extends Transform {
   lastEventId  = null;
+  eventsNb = 0;
 
   constructor(req) {
     super({ objectMode: true });
@@ -62,11 +63,14 @@ class SseStream extends Transform {
     encoding,
     callback
   ) {
-    if (message.type) this.push(`event: ${message.type}\n`);
-    if (message.id) this.push(`id: ${message.id}\n`);
-    if (message.retry) this.push(`retry: ${message.retry}\n`);
-    if (message.data) this.push(toDataString(message.data));
-    this.push('\n');
+    let data = ''
+    if (message.type) data += `event: ${message.type}\n`;
+    if (message.id) data += `id: ${message.id}\n`;
+    if (message.retry) data += `retry: ${message.retry}\n`;
+    if (message.data) data += toDataString(message.data);
+    data += '\n';
+
+    this.push(data);
     callback();
   }
 
@@ -80,7 +84,11 @@ class SseStream extends Transform {
       message.id = this.lastEventId.toString();
     }
 
-    return this.write(message, encoding, cb);
+    if (!this.write(message, encoding, cb)) {
+      this.once('drain', cb);
+    } else {
+      process.nextTick(cb);
+    }
   }
 }
 
@@ -102,8 +110,7 @@ http.createServer((request, response) => {
   const eventLoopQueue = () => {
     return new Promise(resolve => 
       setImmediate(() => {
-        stream.writeMessage({data: '{"message": "!dice", "channel": "s0yuk4", "nickname": "soyuka"}'});
-        resolve();
+        stream.writeMessage({data: {message: "!dice", channel: "s0yuk4", nickname: "soyuka"}}, 'utf-8', resolve);
       })
     );
   }

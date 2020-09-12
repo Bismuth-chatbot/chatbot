@@ -1,15 +1,28 @@
 <?php
 
+/*
+ * This file is part of the Bizmuth Bot project
+ *
+ * (c) Antoine Bluchet <antoine@bluchet.fr>
+ * (c) Lemay Marc <flugv1@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
+use App\Command\CurrentSpotifyTrack;
+use App\Command\Dice;
 use App\Spotify\Client as SpotifyClient;
 use App\Twitch\Client as TwitchClient;
+use App\Twitch\Transport as TwitchTransport;
 use Symfony\Component\HttpClient\EventSourceHttpClient;
 use Symfony\Component\Mercure\Jwt\StaticJwtProvider;
 use Symfony\Component\Mercure\Publisher;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-return function(ContainerConfigurator $configurator) {
+return function (ContainerConfigurator $configurator) {
     $parameters = $configurator->parameters();
     $parameters->set('app.mercure.jwt', $_ENV['MERCURE_JWT_TOKEN'])
         ->set('app.mercure.hub', $_ENV['MERCURE_HUB_URL'])
@@ -38,7 +51,7 @@ return function(ContainerConfigurator $configurator) {
             service(HttpClientInterface::class),
         ])
     ;
-    /**
+    /*
      * Spotify Client
      */
     $configurator->parameters()
@@ -47,7 +60,7 @@ return function(ContainerConfigurator $configurator) {
     $services->get(SpotifyClient::class)
         ->arg('$spotifyToken', '%app.spotify.oauth_token%')
     ;
-    /**
+    /*
      * Twitch settings
      */
     $configurator->parameters()
@@ -61,4 +74,7 @@ return function(ContainerConfigurator $configurator) {
         ->arg('$twitchChannel', '%app.twitch.channel_name%')
         ->call('setLogger', [service('logger')])
     ;
+
+    $services->get(Dice::class)->arg('$transport', service(TwitchTransport::class));
+    $services->get(CurrentSpotifyTrack::class)->arg('$transport', service(TwitchTransport::class));
 };
