@@ -25,3 +25,14 @@ jobs:
       - uses: actions/checkout@v2
       - name: PHP-CS-Fixer
         uses: docker://oskarstark/php-cs-fixer-ga
+  phpunit:
+    name: PHPUnit
+    steps:
+      - uses: actions/checkout@v2
+      - uses: shivammathur/setup-php@v2
+        with:
+            php-version: '7.4'
+            extensions: curl, sockets, iconv, json, ctype
+      - name: Setup PCOV
+        run: |
+          vendor/bin/simple-phpunit
