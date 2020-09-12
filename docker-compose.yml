@@ -8,18 +8,18 @@ services:
             - JWT_KEY=aw3s0mep4ss
             - CORS_ALLOWED_ORIGINS=*
             - ALLOW_ANONYMOUS=true
-            - PUBLISH_ALLOWED_ORIGINS=http://command-interceptor,http://localhost
+            - PUBLISH_ALLOWED_ORIGINS=http://command-interceptor,http://localhost,https://app.livestorm.co
         ports:
             - '8080:80'
 
-    commands:
-        build:
-            context: .
-        environment:
-            - SHELL_VERBOSITY=3
-        depends_on:
-            - mercure
-        volumes:
-            - '.:/usr/src/chatbot'
-        ports:
-            - '8081:8080'
+    # commands:
+    #     build:
+    #         context: .
+    #     environment:
+    #         - SHELL_VERBOSITY=3
+    #     depends_on:
+    #         - mercure
+    #     volumes:
+    #         - '.:/usr/src/chatbot'
+    #     ports:
+    #         - '8081:8080'
