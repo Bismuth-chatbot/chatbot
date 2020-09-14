@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 const { Transform } = require('stream');
 const http = require('http')
 
@@ -126,4 +127,4 @@ http.createServer((request, response) => {
   request.on('close', () => {
     response.end();
   });
-}).listen(8081, '127.0.0.1');
+}).listen(8081, '127.0.0.1', () => console.log('listening on 8081'));
