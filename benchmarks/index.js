@@ -41,54 +41,10 @@ function getCpuData(data) {
 async function main() {
   const response = await fetch('monit-logger.json')
   const data = normalizeData(await response.json())
-  const stressTests = [
-    [0, 10],
-    [30, 60],
-    [80, 140],
-    [200, 500],
-    [560, 860]
-  ]
 
   var options = {
     annotations: {
       position: 'front',
-      // xaxis: [
-      //   {
-      //     x: data[stressTests[0][0]]["Time"],
-      //     x2: data[stressTests[0][1]]["Time"],
-      //     label: {
-      //       text: '1 req/s with 1 connection'
-      //     }
-      //   },
-      //   {
-      //     x: data[stressTests[1][0]]["Time"],
-      //     x2: data[stressTests[1][1]]["Time"],
-      //     label: {
-      //       text: '50 req/s with 1 connection'
-      //     }
-      //   },
-      //   {
-      //     x: data[stressTests[2][0]]["Time"],
-      //     x2: data[stressTests[2][1]]["Time"],
-      //     label: {
-      //       text: '50 req/s with 100 connections'
-      //     }
-      //   },
-      //   {
-      //     x: data[stressTests[3][0]]["Time"],
-      //     x2: data[stressTests[3][1]]["Time"],
-      //     label: {
-      //       text: '50 req/s with 10000 connections'
-      //     }
-      //   },
-      //   {
-      //     x: data[stressTests[4][0]]["Time"],
-      //     x2: data[stressTests[4][1]]["Time"],
-      //     label: {
-      //       text: '100 req/s with 50000 connections'
-      //     }
-      //   }
-      // ]
     },
     chart: {
       type: 'line'

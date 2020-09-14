@@ -12,11 +12,13 @@
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
+use App\Command\Applause;
 use App\Command\CurrentSpotifyTrack;
 use App\Command\Dice;
 use App\Spotify\Client as SpotifyClient;
 use App\Twitch\Client as TwitchClient;
 use App\Twitch\Transport as TwitchTransport;
+use App\Livestorm\Transport as LivestormTransport;
 use Symfony\Component\HttpClient\EventSourceHttpClient;
 use Symfony\Component\Mercure\Jwt\StaticJwtProvider;
 use Symfony\Component\Mercure\Publisher;
@@ -77,4 +79,5 @@ return function (ContainerConfigurator $configurator) {
 
     $services->get(Dice::class)->arg('$transport', service(TwitchTransport::class));
     $services->get(CurrentSpotifyTrack::class)->arg('$transport', service(TwitchTransport::class));
+    $services->get(Applause::class)->arg('$transport', service(LivestormTransport::class));
 };
