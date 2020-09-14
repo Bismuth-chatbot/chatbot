@@ -65,7 +65,7 @@ final class Consumer
 
     private function getMessageClass(array $topics): string
     {
-        if (strpos($topics[0], 'twitch.tv')) {
+        if (strpos($topics[0], 'twitch.tv') || strpos($topics[0], 'app.livestorm.co')) {
             return TwitchMessage::class;
         }
 
