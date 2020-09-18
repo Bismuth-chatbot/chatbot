@@ -53,9 +53,6 @@
     "drift/http-kernel": {
         "version": "0.1.11"
     },
-    "drift/preload-bundle": {
-        "version": "dev-master"
-    },
     "drift/react-functions": {
         "version": "0.1.1"
     },
@@ -80,11 +77,8 @@
     "indigophp/hash-compat": {
         "version": "1.2-dev"
     },
-    "mmoreram/base-bundle": {
-        "version": "2.2.0"
-    },
-    "mmoreram/symfony-bundle-dependencies": {
-        "version": "2.2.0"
+    "nesbot/carbon": {
+        "version": "2.x-dev"
     },
     "php": {
         "version": "7.4"

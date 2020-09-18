@@ -1,5 +1,4 @@
 <?php
-
 /*
  * This file is part of the Bizmuth Bot project
  *
@@ -10,38 +9,46 @@
  * file that was distributed with this source code.
  */
 
-namespace App\Spotify;
+namespace App\Music\Spotify;
 
+use App\Music\Exception\NoMusicPlayingException;
+use App\Music\IClient;
 use Psr\Log\LoggerInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-final class Client
+final class Client implements IClient
 {
     private $spotifyToken;
     private $client;
     private $logger;
-
+    
     public function __construct($spotifyToken, HttpClientInterface $client, LoggerInterface $logger)
     {
         $this->spotifyToken = $spotifyToken;
         $this->client = $client;
         $this->logger = $logger;
     }
-
+    
     public function getCurrentTrack()
     {
         $response = $this->client->request('GET', 'https://api.spotify.com/v1/me/player/currently-playing', [
-            'headers' => ['Authorization' => 'Bearer '.$this->spotifyToken],
+            'headers' => ['Authorization' => 'Bearer ' . $this->spotifyToken],
         ]);
         $track = json_decode($response->getContent(false), true);
+    
         if (!isset($track['item'])) {
-            return 'no music playing';
+            throw new NoMusicPlayingException();
         }
-        $str = $track['item']['name'].' ('.$track['item']['album']['name'].') by ';
+        $str = $track['item']['name'] . ' (' . $track['item']['album']['name'] . ') by ';
         foreach ($track['item']['artists'] as $i => $artist) {
-            $str .= 0 === $i ? $artist['name'] : ', '.$artist['name'];
+            $str .= 0 === $i ? $artist['name'] : ', ' . $artist['name'];
         }
-
+        
         return $str;
+    }
+    
+    public function get(string $service): IClient
+    {
+        return $this;
     }
 }

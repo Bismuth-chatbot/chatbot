@@ -30,7 +30,6 @@ class RoutesCollection
     public function get(string $verb, string $path): CommandController
     {
         $resolver = RouteResolver::resolve($verb, $path);
-
         foreach ($this->routes as $route) {
             if (null !== u(get_class($route))->indexOf($resolver)) {
                 return $route;

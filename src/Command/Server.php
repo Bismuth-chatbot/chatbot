@@ -1,5 +1,4 @@
 <?php
-
 /*
  * This file is part of the Bizmuth Bot project
  *
@@ -9,7 +8,6 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-
 declare(strict_types=1);
 
 namespace App\Command;
@@ -38,10 +36,9 @@ class Server extends Command
     private Publisher $publisher;
     private SerializerInterface $serializer;
     private HttpServer $httpServer;
-
     private RoutesCollection $routes;
     private array $commands;
-
+    
     public function __construct(
         TwitchClient $twitchClient,
         Publisher $publisher,
@@ -58,51 +55,64 @@ class Server extends Command
         $this->routes = $routes;
         $this->commands = $commands;
     }
-
+    
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $io = new SymfonyStyle($input, $output);
         $loop = EventLoopFactory::create();
-
-        $consoleBin = getcwd().'/bin/console';
+        $consoleBin = getcwd() . '/bin/console';
         foreach ($this->commands as $command) {
-            $process = new Process($consoleBin.' '.$command.' -vvv');
+            $process = new Process($consoleBin . ' ' . $command . ' -vvv');
             $process->start($loop);
         }
-
         $clientSocket = $this->twitchClient->connect($loop);
-        $this->httpServer->run($loop, function (ServerRequestInterface $request) use ($io) {
+        
+        $loop->addPeriodicTimer(300, function() use($io){
+            $this->twitchClient->pong();
+            $io->success('send pong');
+        });
+        
+        $this->httpServer->run($loop, function(ServerRequestInterface $request) use ($io) {
+            
             if (false === strpos($request->getHeader('content-type')[0], 'application/json')) {
                 return new Response(400);
             }
-            $io->writeln([$request->getMethod(), $request->getUri()->getPath()]);
             try {
-                return $this->routes->get($request->getMethod(), $request->getUri()->getPath())($this->twitchClient, $request);
+                return $this->routes->get($request->getMethod(), $request->getUri()->getPath())($this->twitchClient,
+                    $request);
             } catch (RouteNotFoundException $e) {
                 return new Response(404);
             } catch (\Exception $e) {
                 $io->error([$e->getMessage(), $e->getLine(), $e->getFile()]);
-
+                
                 return new Response(500);
             }
         });
-
         $clientSocket->on('data', [$this->twitchClient, 'parse']);
-        $clientSocket->on('message', function ($data) use ($io) {
-            $message = json_decode($data, true);
-            $channel = '#' === $message['channel'][0] ? substr($message['channel'],
-                1) : $message['channel']; // remove #
-            $topics = [Topic::create(['<channel>' => $channel])];
-            if ((bool) $message['isCommand']) {
-                $topics[] = Topic::create(['<channel>' => $channel, '<command>' => $message['command']]);
+        $clientSocket->on('message', function($data) use ($io) {
+            try {
+                $message = json_decode((string)$data, true);
+                $channel = '#' === $message['channel'][0] ? substr($message['channel'],
+                    1) : $message['channel'];
+                $topics = [
+                    Topic::create(['<channel>' => $channel]),
+                    Topic::create(['<channel>' => $channel, '<command>' => 'mediator']),
+                    Topic::create(['<channel>' => $channel, '<command>' => 'emote']),
+                    Topic::create(['<channel>' => $channel, '<command>' => 'findword']),
+                ];
+                if ((bool)$message['isCommand']) {
+                    $topics[] = Topic::create(['<channel>' => $channel, '<command>' => $message['command']]);
+                }
+                $io->success('send message ' . json_encode($message));
+                $this->publisher->__invoke(new Update($topics, $data));
+            } catch (\Exception $e) {
+                $io->error($e->getMessage());
             }
-
-            $io->success('send message '.json_encode($message));
-            $this->publisher->__invoke(new Update($topics, $data));
+            
         });
-        $io->success('Server is up on '.$this->httpServer->getHttpHost());
+        $io->success('Server is up on ' . $this->httpServer->getHttpHost());
         $loop->run();
-
+        
         return Command::SUCCESS;
     }
 }
