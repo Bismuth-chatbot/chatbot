@@ -39,7 +39,7 @@ final class Applause extends Command
     {
         foreach ($this->transport->commands('applause') as $message) {
             if ($message->isCommand() && in_array($message->getCommand(), ['applause', 'bravo', 'gz', 'congrats', 'gj', 'merci'], true)) {
-                exec(sprintf('ffplay -nodisp -autoexit %s >/dev/null 2>&1 & ', __DIR__.'/../../applause.mp3'));
+                exec(sprintf('ffplay -nodisp -autoexit %s >/dev/null 2>&1 & ', __DIR__.'/../../benchmarks/livestorm/applause.mp3'));
             }
         }
 

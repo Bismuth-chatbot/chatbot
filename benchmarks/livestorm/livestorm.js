@@ -14,14 +14,16 @@
             continue;
           }
 
-          const data = mutation.addedNodes['0'].querySelector('p.msg').textContent
+          setTimeout(() => {
+            const data = mutation.addedNodes['0'].querySelector('p.msg').innerText
 
-          if (!data.startsWith('!')) {
-            return;
-          }
+            if (!data.startsWith('!')) {
+              return;
+            }
 
-          const message = {message: data, nickname: 'unknown', channel: 'unknown'}
-          fetch('http://localhost:8080/.well-known/mercure', {method: 'POST', headers: {'Content-Type': 'application/x-www-form-urlencoded', 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJtZXJjdXJlIjp7InB1Ymxpc2giOltdfX0.GFRUFE2C1GaLTnX2WZnO3SoeOM0rrVcI0yph1K_Oo-w'}, body: `topic=https://app.livestorm.co/command/applause&data=${encodeURI(JSON.stringify(message))}`})
+            const message = {message: data, nickname: 'unknown', channel: 'unknown'}
+            fetch('http://localhost:8080/.well-known/mercure', {method: 'POST', headers: {'Content-Type': 'application/x-www-form-urlencoded', 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJtZXJjdXJlIjp7InB1Ymxpc2giOltdfX0.GFRUFE2C1GaLTnX2WZnO3SoeOM0rrVcI0yph1K_Oo-w'}, body: `topic=https://app.livestorm.co/command/applause&data=${encodeURI(JSON.stringify(message))}`})
+          }, 1)
         }
     };
 
