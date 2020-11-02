@@ -18,6 +18,3 @@ node_modules
 .phpunit.result.cache
 /phpunit.xml
 ###< symfony/phpunit-bridge ###
-.env.local
-users
-games

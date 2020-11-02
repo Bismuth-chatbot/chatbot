@@ -15,7 +15,6 @@ RUN docker-php-ext-configure sockets && docker-php-ext-install sockets pcntl
 COPY ./config/supervisord.ini /etc/supervisor.d/chatbot.ini
 
 COPY --from=composer /usr/bin/composer /usr/bin/composer
-COPY --from=build-env /src/supervisordstat /usr/bin/supervisordstat
 
 WORKDIR /usr/src/chatbot
 

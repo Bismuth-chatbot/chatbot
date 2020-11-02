@@ -1,4 +1,5 @@
 <?php
+
 /*
  * This file is part of the Bizmuth Bot project
  *
@@ -21,32 +22,32 @@ final class Client implements IClient
     private $spotifyToken;
     private $client;
     private $logger;
-    
+
     public function __construct($spotifyToken, HttpClientInterface $client, LoggerInterface $logger)
     {
         $this->spotifyToken = $spotifyToken;
         $this->client = $client;
         $this->logger = $logger;
     }
-    
+
     public function getCurrentTrack()
     {
         $response = $this->client->request('GET', 'https://api.spotify.com/v1/me/player/currently-playing', [
-            'headers' => ['Authorization' => 'Bearer ' . $this->spotifyToken],
+            'headers' => ['Authorization' => 'Bearer '.$this->spotifyToken],
         ]);
         $track = json_decode($response->getContent(false), true);
-    
+
         if (!isset($track['item'])) {
             throw new NoMusicPlayingException();
         }
-        $str = $track['item']['name'] . ' (' . $track['item']['album']['name'] . ') by ';
+        $str = $track['item']['name'].' ('.$track['item']['album']['name'].') by ';
         foreach ($track['item']['artists'] as $i => $artist) {
-            $str .= 0 === $i ? $artist['name'] : ', ' . $artist['name'];
+            $str .= 0 === $i ? $artist['name'] : ', '.$artist['name'];
         }
-        
+
         return $str;
     }
-    
+
     public function get(string $service): IClient
     {
         return $this;

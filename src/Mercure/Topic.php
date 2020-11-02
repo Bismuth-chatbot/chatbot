@@ -12,8 +12,17 @@
 
 declare(strict_types=1);
 
-namespace App\Music\Exception;
+namespace App\Mercure;
 
-class NoMusicPlayingException extends \Exception
+class Topic
 {
+    public static function create(array $params): string
+    {
+        $uri = 'https://twitch.tv/<channel>';
+        if (isset($params['<command>'])) {
+            $uri = $uri.'/command/<command>';
+        }
+
+        return strtr($uri, $params);
+    }
 }

@@ -1,4 +1,5 @@
 <?php
+
 /*
  * This file is part of the Bizmuth Bot project
  *
@@ -13,10 +14,8 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
 use App\Command\CurrentSpotifyTrack;
 use App\Command\Dice;
-use App\Analisys\Comportment;
 use App\Drift\Controller\CommandController;
 use App\Drift\Controller\Twitch\PostCommand as TwitchPostCommand;
-use App\Drift\Controller\User\PostCommand as UserPostCommand;
 use App\Http\Router\RoutesCollection;
 use App\Music\ServiceMusicCollection;
 use App\Music\Spotify\Client as SpotifyClient;
@@ -32,8 +31,6 @@ return function(ContainerConfigurator $configurator) {
     $parameters = $configurator->parameters();
     $parameters->set('app.mercure.jwt', $_ENV['MERCURE_JWT_TOKEN'])
         ->set('app.mercure.hub', $_ENV['MERCURE_HUB_URL'])
-        ->set('env(COMMANDS)', '["app:dice", "app:music", "app:emote", "app:game:find:word"]')
-        ->set('env(PATH_WORDS)', "%kernel.project_dir%/config/words.json")
     ;
     $services = $configurator->services()
         ->defaults()
@@ -43,8 +40,6 @@ return function(ContainerConfigurator $configurator) {
         ->bind('$mercureHubUrl', '%app.mercure.hub%')
         ->bind('$twitchChannel', '%app.twitch.channel_name%')
         ->bind('$httpHost', '0.0.0.0:8080')
-        ->bind('$commands', '%env(json:COMMANDS)%')
-        ->bind('$usersPath', getcwd() . '/users')
     ;
     $services->load('App\\', '../src/*')
         ->exclude('../src/{DependencyInjection,Entity,Tests,Kernel.php}')
@@ -91,9 +86,6 @@ return function(ContainerConfigurator $configurator) {
     $services->set(TwitchPostCommand::class)
         ->tag('app.controller.command')
     ;
-    $services->set(UserPostCommand::class)
-        ->tag('app.controller.command')
-    ;
 
     $services->get(Dice::class)->arg('$transport', service(TwitchTransport::class));
     $services->get(CurrentSpotifyTrack::class)->arg('$transport', service(TwitchTransport::class));
@@ -105,8 +97,5 @@ return function(ContainerConfigurator $configurator) {
     ;
     $services->set(RoutesCollection::class)
         ->args([tagged_iterator('app.controller.command')])
-    ;
-    $services->set(Comportment::class)
-        ->args(['%env(json:file:resolve:PATH_WORDS)%'])
     ;
 };

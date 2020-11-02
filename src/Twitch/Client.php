@@ -1,4 +1,5 @@
 <?php
+
 /*
  * This file is part of the Bizmuth Bot project
  *
@@ -8,6 +9,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 declare(strict_types=1);
 
 namespace App\Twitch;
@@ -33,7 +35,7 @@ final class Client implements IClient, ISpecialMessage
     private string $twitchChannel;
     private string $oauthToken;
     private string $botUsername;
-    
+
     public function __construct(string $oauthToken, string $botUsername, string $twitchChannel)
     {
         $this->logger = new NullLogger();
@@ -41,54 +43,54 @@ final class Client implements IClient, ISpecialMessage
         $this->oauthToken = $oauthToken;
         $this->botUsername = $botUsername;
     }
-    
+
     public function connect(LoopInterface $loop): DuplexStreamInterface
     {
-        $stream = stream_socket_client(self::TWITCH_IRC_URI . ':' . self::TWITCH_IRC_PORT);
+        $stream = stream_socket_client(self::TWITCH_IRC_URI.':'.self::TWITCH_IRC_PORT);
         $this->socket = new DuplexResourceStream($stream, $loop, self::MAX_LINE);
         $this->logger->info(sprintf('Connecting onto %s:%s on twitchChannel %s as %s', self::TWITCH_IRC_URI,
             self::TWITCH_IRC_PORT, $this->twitchChannel, $this->botUsername));
         $this->send(sprintf('PASS %s', $this->oauthToken));
         $this->send(sprintf('NICK %s', $this->botUsername));
         $this->send(sprintf('JOIN #%s', $this->twitchChannel));
-        
+
         return $this->socket;
     }
-    
+
     public function setLogger(LoggerInterface $logger): void
     {
         $this->logger = $logger;
     }
-    
+
     public function ping(): void
     {
         $this->send('PING :tmi.twitch.tv');
     }
-    
+
     public function pong(): void
     {
         $this->send('PONG :tmi.twitch.tv');
     }
-    
+
     public function sendMessage(string $message): void
     {
         $this->send(sprintf('PRIVMSG #%s :%s', $this->twitchChannel, $message));
-        $this->logger->info('send message ' . $message . " \r\n");
+        $this->logger->info('send message '.$message." \r\n");
     }
-    
+
     public function emit(string $messageType, array $content): void
     {
         $this->socket->emit($messageType, $content);
     }
-    
+
     public function send(string $message): void
     {
         if (!$this->isConnected()) {
             throw new TwitchConnectionFailedException('Not connected');
         }
-        $this->socket->write($message . " \n");
+        $this->socket->write($message." \n");
     }
-    
+
     public function parse(string $data)
     {
         /* @phpstan-ignore-next-line */
@@ -123,21 +125,20 @@ final class Client implements IClient, ISpecialMessage
                         ]
                     ),
                 ]);
-                
             }
         }
     }
-    
+
     public function close()
     {
         $this->socket->close();
     }
-    
+
     public function isConnected(): bool
     {
         return $this->socket->isReadable() && $this->socket->isWritable();
     }
-    
+
     public function get(string $service): IClient
     {
         return $this;
