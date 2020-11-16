@@ -12,14 +12,15 @@ services:
         ports:
             - '8080:80'
 
-    # commands:
-    #     build:
-    #         context: .
-    #     environment:
-    #         - SHELL_VERBOSITY=3
-    #     depends_on:
-    #         - mercure
-    #     volumes:
-    #         - '.:/usr/src/chatbot'
-    #     ports:
-    #         - '8081:8080'
+    commands:
+        build:
+            context: .
+        environment:
+            - SHELL_VERBOSITY=3
+        depends_on:
+            - mercure
+        volumes:
+            - '.:/usr/src/chatbot'
+        ports:
+            - '8081:8080'
+        restart: on-failure

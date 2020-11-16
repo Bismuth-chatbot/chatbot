@@ -1,7 +1,7 @@
 #!/usr/bin/env php
 <?php
 
-use App\Kernel;
+use App\AsyncKernel;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Dotenv\Dotenv;
@@ -38,6 +38,6 @@ if ($_SERVER['APP_DEBUG']) {
     }
 }
 
-$kernel = new Kernel($_SERVER['APP_ENV'], (bool) $_SERVER['APP_DEBUG']);
+$kernel = new AsyncKernel($_SERVER['APP_ENV'], (bool) $_SERVER['APP_DEBUG']);
 $application = new Application($kernel);
 $application->run($input);

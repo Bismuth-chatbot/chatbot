@@ -10,12 +10,14 @@
  * file that was distributed with this source code.
  */
 
-namespace App\Spotify;
+namespace App\Music\Spotify;
 
+use App\Music\Exception\NoMusicPlayingException;
+use App\Music\IClient;
 use Psr\Log\LoggerInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-final class Client
+final class Client implements IClient
 {
     private $spotifyToken;
     private $client;
@@ -34,8 +36,9 @@ final class Client
             'headers' => ['Authorization' => 'Bearer '.$this->spotifyToken],
         ]);
         $track = json_decode($response->getContent(false), true);
+
         if (!isset($track['item'])) {
-            return 'no music playing';
+            throw new NoMusicPlayingException();
         }
         $str = $track['item']['name'].' ('.$track['item']['album']['name'].') by ';
         foreach ($track['item']['artists'] as $i => $artist) {
@@ -43,5 +46,10 @@ final class Client
         }
 
         return $str;
+    }
+
+    public function get(string $service): IClient
+    {
+        return $this;
     }
 }

@@ -12,7 +12,7 @@
 
 namespace App\Command;
 
-use App\Spotify\Client as SpotifyClient;
+use App\Music\Spotify\Client as SpotifyClient;
 use App\Transport\TransportInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;

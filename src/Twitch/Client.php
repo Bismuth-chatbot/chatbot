@@ -15,17 +15,19 @@ declare(strict_types=1);
 namespace App\Twitch;
 
 use App\Exception\TwitchConnectionFailedException;
+use App\Service\IClient;
+use App\Service\ISpecialMessage;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
-use React\EventLoop\Factory;
 use React\EventLoop\LoopInterface;
 use React\Stream\DuplexResourceStream;
 use React\Stream\DuplexStreamInterface;
 
-final class Client
+final class Client implements IClient, ISpecialMessage
 {
     private const TWITCH_IRC_URI = 'irc.chat.twitch.tv';
     private const TWITCH_IRC_PORT = 6667;
+    private const  TWITCH_IRC_MESSAGE_PING = 'PING :tmi.twitch.tv';
     /** @see https://discuss.dev.twitch.tv/t/missing-client-side-message-length-check/21316 */
     private const MAX_LINE = 512;
     private DuplexStreamInterface $socket;
@@ -33,7 +35,6 @@ final class Client
     private string $twitchChannel;
     private string $oauthToken;
     private string $botUsername;
-    private $loop;
 
     public function __construct(string $oauthToken, string $botUsername, string $twitchChannel)
     {
@@ -41,14 +42,13 @@ final class Client
         $this->twitchChannel = $twitchChannel;
         $this->oauthToken = $oauthToken;
         $this->botUsername = $botUsername;
-        $this->loop = Factory::create();
     }
 
-    public function connect(?LoopInterface $loop = null): DuplexStreamInterface
+    public function connect(LoopInterface $loop): DuplexStreamInterface
     {
         $stream = stream_socket_client(self::TWITCH_IRC_URI.':'.self::TWITCH_IRC_PORT);
-        $this->socket = new DuplexResourceStream($stream, $loop ?? $this->loop, self::MAX_LINE);
-        $this->logger->info(sprintf('Connecting onto %s:%s on channel %s as %s', self::TWITCH_IRC_URI,
+        $this->socket = new DuplexResourceStream($stream, $loop, self::MAX_LINE);
+        $this->logger->info(sprintf('Connecting onto %s:%s on twitchChannel %s as %s', self::TWITCH_IRC_URI,
             self::TWITCH_IRC_PORT, $this->twitchChannel, $this->botUsername));
         $this->send(sprintf('PASS %s', $this->oauthToken));
         $this->send(sprintf('NICK %s', $this->botUsername));
@@ -64,12 +64,12 @@ final class Client
 
     public function ping(): void
     {
-        $this->send(sprintf('PING :tmi.twitch.tv'));
+        $this->send('PING :tmi.twitch.tv');
     }
 
     public function pong(): void
     {
-        $this->send(sprintf('PONG :tmi.twitch.tv'));
+        $this->send('PONG :tmi.twitch.tv');
     }
 
     public function sendMessage(string $message): void
@@ -91,7 +91,7 @@ final class Client
         $this->socket->write($message." \n");
     }
 
-    public function parse(string $data): \Iterator
+    public function parse(string $data)
     {
         /* @phpstan-ignore-next-line */
         $messages = array_filter(preg_split('/[\r\n]/', $data), 'strlen');
@@ -99,7 +99,32 @@ final class Client
             if (preg_match_all('/^:(.+?(?=!)).+ PRIVMSG (.+?(?=:)):(.+)$/', $message, $matches)) {
                 $message = new Message($matches[3][0], $matches[1][0], trim($matches[2][0]));
                 $this->logger->info(sprintf('Message: "%s"', $message));
-                yield $message;
+                $this->socket->emit('message', [
+                    json_encode(
+                        [
+                            'channel' => $message->getChannel(),
+                            'nickname' => $message->getNickname(),
+                            'message' => $message->getMessage(),
+                            'command' => $message->getCommand(),
+                            'isCommand' => $message->isCommand(),
+                        ]
+                    ),
+                ]);
+            }
+            if ($message === self::TWITCH_IRC_MESSAGE_PING) {
+                $message = new Message('ping', 'serverbot', 'twitch');
+                $this->logger->info(sprintf('Message: "%s"', $message));
+                $this->socket->emit('message', [
+                    json_encode(
+                        [
+                            'channel' => $message->getChannel(),
+                            'nickname' => $message->getNickname(),
+                            'message' => $message->getMessage(),
+                            'command' => $message->getCommand(),
+                            'isCommand' => $message->isCommand(),
+                        ]
+                    ),
+                ]);
             }
         }
     }
@@ -112,5 +137,10 @@ final class Client
     public function isConnected(): bool
     {
         return $this->socket->isReadable() && $this->socket->isWritable();
+    }
+
+    public function get(string $service): IClient
+    {
+        return $this;
     }
 }
